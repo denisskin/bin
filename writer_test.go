@@ -2,6 +2,7 @@ package bin
 
 import (
 	"bytes"
+	"math"
 	"testing"
 
 	"math/big"
@@ -25,8 +26,7 @@ func TestWriter_WriteVar(t *testing.T) {
 	w.WriteVar(256)
 	w.WriteVar(-13)
 	w.WriteVar(0x01020304050607)
-	var max64 uint64 = 0xffffffffffffffff
-	w.WriteVar(max64)
+	w.WriteVar(uint64(math.MaxUint64))
 	w.WriteVar(0.3)
 	w.WriteVar([]int{77, 88, 99})
 	w.WriteVar("abc")
