@@ -94,6 +94,10 @@ func (w *Writer) WriteBool(f bool) error {
 }
 
 //----------- var types ----------------
+func (w *Writer) WriteVarUint(num uint64) error {
+	return w.writeVarInt(int64(num))
+}
+
 func (w *Writer) WriteVarInt(num int) error {
 	return w.writeVarInt(int64(num))
 }

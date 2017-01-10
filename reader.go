@@ -165,6 +165,11 @@ func (r *Reader) ReadVarInt() (int, error) {
 	return int(v), r.err
 }
 
+func (r *Reader) ReadVarUint() (uint64, error) {
+	v := r.readVarInt()
+	return uint64(v), r.err
+}
+
 func (r *Reader) ReadSliceBytes() ([][]byte, error) {
 	n, err := r.ReadVarInt()
 	if err != nil {
