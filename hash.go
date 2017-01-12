@@ -58,6 +58,10 @@ func Hash256(values ...interface{}) []byte {
 		case error:
 			hash.Write([]byte(v.Error()))
 
+		case BinEncoder:
+			buf, _ := Encode(v)
+			hash.Write(buf)
+
 		case io.Reader:
 			io.Copy(hash, v)
 
