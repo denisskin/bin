@@ -1,6 +1,7 @@
 package bin
 
 import (
+	"encoding/gob"
 	"errors"
 	"io"
 	"math"
@@ -299,7 +300,8 @@ func (r *Reader) ReadVar(val interface{}) error {
 		//	}
 		//}
 
-		panic("Unkonown type")
+		// other type
+		r.err = gob.NewDecoder(r).Decode(v)
 	}
 	return r.err
 }

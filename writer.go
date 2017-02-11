@@ -2,6 +2,7 @@ package bin
 
 import (
 	"bytes"
+	"encoding/gob"
 	"io"
 	"math"
 	"time"
@@ -210,7 +211,7 @@ func (w *Writer) WriteVar(val interface{}) error {
 		w.WriteError(v)
 
 	default:
-		panic("Unkonown type")
+		w.err = gob.NewEncoder(w).Encode(v)
 	}
 	return w.err
 }
