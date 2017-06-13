@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"io"
 	"math"
+	"math/big"
 	"reflect"
 	"time"
 )
@@ -132,6 +133,34 @@ func (w *Writer) WriteVarInt64(i int64) error {
 	return w.write(buf[bufMaxLen-1-n:])
 }
 
+func (w *Writer) WriteBigInt(i *big.Int) error {
+	sign := i.Sign()
+	if sign == 0 {
+		return w.write([]byte{0})
+	}
+	b := i.Bytes()
+	n := len(b)
+	if sign > 0 && n == 1 && b[0] < 128 {
+		return w.write(b)
+	}
+	var h = byte(0x80)
+	if sign < 0 {
+		h |= 0x40
+	}
+	if n < 0x3f {
+		h |= byte(n)
+	} else {
+		h |= 0x3f
+	}
+	if w.write([]byte{h}) != nil {
+		return w.err
+	}
+	if n >= 0x3f && w.WriteVarInt(n) != nil {
+		return w.err
+	}
+	return w.write(b)
+}
+
 func (w *Writer) WriteSliceBytes(bb [][]byte) error {
 	w.WriteVarInt(len(bb))
 	for _, d := range bb {
@@ -209,6 +238,11 @@ func (w *Writer) WriteVar(val interface{}) error {
 		w.WriteBytes(v)
 	case [][]byte:
 		w.WriteSliceBytes(v)
+
+	case *big.Int:
+		w.WriteBigInt(v)
+	case big.Int:
+		w.WriteBigInt(&v)
 
 	case Encoder:
 		w.WriteBytes(v.Encode())
