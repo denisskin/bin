@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"math"
+	"math/big"
 	"reflect"
 	"time"
 )
@@ -147,23 +148,47 @@ func (r *Reader) readVarInt() (i int64) {
 	if b0&0x80 == 0 {
 		return int64(b0)
 	}
-	n := int(b0 & 0x0f)
-	if n > 0 {
-		if n > 8 {
-			r.SetError(errBinaryDataWasCorrupted)
-			return
-		}
-		bb, err := r.read(n)
-		if err != nil {
-			return
-		}
-		for _, c := range bb {
-			i <<= 8
-			i |= int64(c)
-		}
-		if b0&0x40 != 0 {
-			i = -i
-		}
+	n := int(b0 & 0x3f)
+	if n > 8 {
+		r.SetError(errBinaryDataWasCorrupted)
+		return
+	}
+	bb, err := r.read(n)
+	if err != nil {
+		return
+	}
+	for _, c := range bb {
+		i <<= 8
+		i |= int64(c)
+	}
+	if b0&0x40 != 0 {
+		i = -i
+	}
+	return
+}
+
+func (r *Reader) ReadBigInt() (i *big.Int, err error) {
+	b0, err := r.ReadUint8()
+	if err != nil {
+		return
+	}
+	if b0&0x80 == 0 {
+		i = big.NewInt(int64(b0))
+		return
+	}
+	i = new(big.Int)
+	var n int
+	n = int(b0 & 0x3f)
+	if n == 0x3f {
+		n = int(r.readVarInt())
+	}
+	bb, err := r.read(n)
+	if err != nil {
+		return
+	}
+	i.SetBytes(bb)
+	if b0&0x40 != 0 {
+		i.Neg(i)
 	}
 	return
 }
@@ -295,6 +320,13 @@ func (r *Reader) ReadVar(val interface{}) error {
 		*v, _ = r.ReadBytes()
 	case *[][]byte:
 		*v, _ = r.ReadSliceBytes()
+
+	case **big.Int:
+		*v, _ = r.ReadBigInt()
+	case *big.Int:
+		if x, err := r.ReadBigInt(); err == nil {
+			v.Set(x)
+		}
 
 	case Decoder:
 		if bb, err := r.ReadBytes(); err == nil {
