@@ -11,7 +11,7 @@ import (
 type Writer struct {
 	wr         io.Writer
 	err        error
-	CntWritten uint64
+	CntWritten int64
 }
 
 func NewWriter(w io.Writer) *Writer {
@@ -44,7 +44,7 @@ func (w *Writer) Write(bb []byte) (n int, err error) {
 		n64, err = io.Copy(w.wr, bytes.NewBuffer(bb))
 		n = int(n64)
 	}
-	w.CntWritten += uint64(n)
+	w.CntWritten += int64(n)
 	w.SetError(err)
 	return
 }
