@@ -119,14 +119,15 @@ func (w *Writer) WriteVarInt64(i int64) error {
 		h |= 0x40
 		i = -i
 	}
-	buf := make([]byte, 8)
+	buf := make([]byte, 9)
 	var n byte = 0
 	for i > 0 {
 		n++
-		buf[8-n] = byte(i)
+		buf[9-n] = byte(i)
 		i >>= 8
 	}
-	return w.write(append([]byte{h | n}, buf[8-n:]...))
+	buf[9-1-n] = h | n
+	return w.write(buf[9-1-n:])
 }
 
 func (w *Writer) WriteSliceBytes(bb [][]byte) error {
