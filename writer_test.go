@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"testing"
 
+	"math/big"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -43,6 +45,28 @@ func TestWriter_WriteVar(t *testing.T) {
 	}, w.Bytes())
 }
 
+func TestWriter_WriteBigInt(t *testing.T) {
+	w := NewBuffer(nil)
+
+	w.WriteVar(big.NewInt(0))
+	w.WriteVar(big.NewInt(13))
+	w.WriteVar(big.NewInt(255))
+	w.WriteVar(big.NewInt(256))
+	w.WriteVar(big.NewInt(-13))
+	w.WriteVar(big.NewInt(0x01020304050607))
+	w.WriteVar(newBigInt("ffeeddccbbaa99887766554433221100ffeeddccbbaa99887766554433221100")) // 256 bit
+
+	assert.Equal(t, []byte{
+		0,          // 0
+		13,         // 13
+		0x81, 0xff, // 255
+		0x82, 1, 0, // 256
+		0xc1, 13, // -13
+		0x87, 1, 2, 3, 4, 5, 6, 7, // 0x01020304050607
+		0xa0, 0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00, 0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00,
+	}, w.Bytes())
+}
+
 func TestWriter_WriteString(t *testing.T) {
 	w := NewBuffer(nil)
 
@@ -50,4 +74,9 @@ func TestWriter_WriteString(t *testing.T) {
 	w.WriteVar("Abc")
 
 	assert.Equal(t, []byte{0, 3, 'A', 'b', 'c'}, w.Bytes())
+}
+
+func newBigInt(hex string) *big.Int {
+	i, _ := big.NewInt(0).SetString(hex, 16)
+	return i
 }
