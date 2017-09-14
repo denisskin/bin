@@ -5,6 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"math/big"
+	"strings"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -59,6 +62,46 @@ func TestReader_ReadVarInt(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, 0x1234, iDec)
+}
+
+func TestReader_ReadBigInt(t *testing.T) {
+	w := NewBuffer(nil)
+	w.WriteVar(0)                                                                             // 0 bit
+	w.WriteVar(127)                                                                           // 8 bit
+	w.WriteVar(int64(0x0123456789abcdef))                                                     // 64 bit
+	w.WriteVar(newBigInt("ffffffff00000000ffffffff00000000"))                                 // 128 bit
+	w.WriteVar(newBigInt("ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000")) // 256 bit
+	w.WriteVar(newBigInt(strings.Repeat("a", 384/4)))                                         // 384 bit
+	w.WriteVar(newBigInt(strings.Repeat("b", 512/4)))                                         // 512 bit
+	w.WriteVar(newBigInt(strings.Repeat("c", 1024/4)))                                        // 1024 bit
+
+	r := w.Reader
+	b0, err0 := r.ReadBigInt()
+	b8, err8 := r.ReadBigInt()
+	b64, err64 := r.ReadBigInt()
+	b128, err128 := r.ReadBigInt()
+	b256, err256 := r.ReadBigInt()
+	b384, err384 := r.ReadBigInt()
+	b512, err512 := r.ReadBigInt()
+	b1024, err1024 := r.ReadBigInt()
+
+	assert.NoError(t, err0)
+	assert.NoError(t, err8)
+	assert.NoError(t, err64)
+	assert.NoError(t, err128)
+	assert.NoError(t, err256)
+	assert.NoError(t, err384)
+	assert.NoError(t, err512)
+	assert.NoError(t, err1024)
+
+	assert.Equal(t, b0, big.NewInt(0))
+	assert.Equal(t, b8, big.NewInt(127))
+	assert.Equal(t, b64, big.NewInt(0x0123456789abcdef))
+	assert.Equal(t, b128, newBigInt("ffffffff00000000ffffffff00000000"))
+	assert.Equal(t, b256, newBigInt("ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000"))
+	assert.Equal(t, b384, newBigInt(strings.Repeat("a", 384/4)))
+	assert.Equal(t, b512, newBigInt(strings.Repeat("b", 512/4)))
+	assert.Equal(t, b1024, newBigInt(strings.Repeat("c", 1024/4)))
 }
 
 func TestReader_ReadFloat64(t *testing.T) {
