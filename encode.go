@@ -23,3 +23,11 @@ func Decode(data []byte, vv ...interface{}) error {
 	}
 	return r.Error()
 }
+
+type binEncoder interface {
+	BinWrite(writer *Writer)
+}
+
+type binDecoder interface {
+	BinRead(reader *Reader)
+}
