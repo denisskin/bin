@@ -249,6 +249,9 @@ func (w *Writer) WriteVar(val interface{}) error {
 	case Encoder:
 		w.WriteBytes(v.Encode())
 
+	case binEncoder:
+		v.BinWrite(w)
+
 	case error:
 		w.WriteError(v)
 
@@ -266,6 +269,7 @@ func (w *Writer) WriteVar(val interface{}) error {
 			}
 
 		} else {
+			panic(666)
 			w.err = gob.NewEncoder(w).Encode(v)
 		}
 	}
