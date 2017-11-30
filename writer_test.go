@@ -2,8 +2,9 @@ package bin
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewBuffer(t *testing.T) {

@@ -2,9 +2,10 @@ package bin
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type Point struct {
