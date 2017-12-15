@@ -102,15 +102,15 @@ func (w *Writer) WriteBool(f bool) error {
 }
 
 //----------- var types ----------------
-func (w *Writer) WriteVarUint(num uint64) error {
-	return w.writeVarInt(int64(num))
-}
-
 func (w *Writer) WriteVarInt(num int) error {
-	return w.writeVarInt(int64(num))
+	return w.WriteVarInt64(int64(num))
 }
 
-func (w *Writer) writeVarInt(i int64) error {
+func (w *Writer) WriteVarUint64(num uint64) error {
+	return w.WriteVarInt64(int64(num))
+}
+
+func (w *Writer) WriteVarInt64(i int64) error {
 	if i >= 0 && i < 128 {
 		return w.write([]byte{byte(i)})
 	}
@@ -168,26 +168,26 @@ func (w *Writer) WriteVar(val interface{}) error {
 		w.Write([]byte{0})
 
 	case int:
-		w.writeVarInt(int64(v))
+		w.WriteVarInt64(int64(v))
 	case int8:
-		w.writeVarInt(int64(v))
+		w.WriteVarInt64(int64(v))
 	case int16:
-		w.writeVarInt(int64(v))
+		w.WriteVarInt64(int64(v))
 	case int32:
-		w.writeVarInt(int64(v))
+		w.WriteVarInt64(int64(v))
 	case int64:
-		w.writeVarInt(int64(v))
+		w.WriteVarInt64(int64(v))
 
 	case uint:
-		w.writeVarInt(int64(v))
+		w.WriteVarInt64(int64(v))
 	case uint8:
-		w.writeVarInt(int64(v))
+		w.WriteVarInt64(int64(v))
 	case uint16:
-		w.writeVarInt(int64(v))
+		w.WriteVarInt64(int64(v))
 	case uint32:
-		w.writeVarInt(int64(v))
+		w.WriteVarInt64(int64(v))
 	case uint64:
-		w.writeVarInt(int64(v))
+		w.WriteVarInt64(int64(v))
 
 	case float32:
 		w.WriteFloat32(v)
