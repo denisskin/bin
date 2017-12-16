@@ -12,8 +12,8 @@ import (
 type Reader struct {
 	rd         io.Reader
 	err        error
-	CntRead    uint64
-	MaxCntRead uint64
+	CntRead    int64
+	maxCntRead int64
 }
 
 var (
@@ -46,11 +46,11 @@ func (r *Reader) Close() error {
 	return nil
 }
 
-func (r *Reader) SetReadLimit(sz uint64) {
+func (r *Reader) SetReadLimit(sz int64) {
 	if sz == 0 {
-		r.MaxCntRead = 0
+		r.maxCntRead = 0
 	} else {
-		r.MaxCntRead = r.CntRead + sz
+		r.maxCntRead = r.CntRead + sz
 	}
 }
 
@@ -62,16 +62,16 @@ func (r *Reader) Read(buf []byte) (n int, err error) {
 		if e, _ := recover().(error); e != nil {
 			err = e
 		}
-		if r.err == nil {
+		if err != nil && r.err == nil {
 			r.err = err
 		}
 	}()
-	if r.MaxCntRead > 0 && uint64(len(buf))+r.CntRead > r.MaxCntRead {
+	if r.maxCntRead > 0 && int64(len(buf))+r.CntRead > r.maxCntRead {
 		err = errExceededAllowableLimit
 		return
 	}
 	n, err = io.ReadFull(r.rd, buf)
-	r.CntRead += uint64(n)
+	r.CntRead += int64(n)
 	return
 }
 
@@ -173,7 +173,12 @@ func (r *Reader) ReadVarInt() (int, error) {
 	return int(v), r.err
 }
 
-func (r *Reader) ReadVarUint() (uint64, error) {
+func (r *Reader) ReadVarInt64() (int64, error) {
+	v := r.readVarInt()
+	return v, r.err
+}
+
+func (r *Reader) ReadVarUint64() (uint64, error) {
 	v := r.readVarInt()
 	return uint64(v), r.err
 }
