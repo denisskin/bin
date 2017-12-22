@@ -18,6 +18,7 @@ func TestReader_ReadVar(t *testing.T) {
 	w.WriteVar("abc")
 	w.WriteVar(3.1415)
 	w.WriteVar([]byte{5, 6, 7})
+	w.WriteVar(Bytes("binary"))
 	w.WriteVar(Point{88, 99})
 	w.WriteVar([]int{7, 8, 9})
 	w.WriteVar(&User{666, "Devil"})
@@ -28,6 +29,7 @@ func TestReader_ReadVar(t *testing.T) {
 		s  string
 		f  float64
 		bb []byte
+		bt Bytes
 		p  Point
 		ii []int
 		u  *User
@@ -38,6 +40,7 @@ func TestReader_ReadVar(t *testing.T) {
 	r.ReadVar(&s)
 	r.ReadVar(&f)
 	r.ReadVar(&bb)
+	r.ReadVar(&bt)
 	r.ReadVar(&p)
 	r.ReadVar(&ii)
 	r.ReadVar(&u)
@@ -47,6 +50,7 @@ func TestReader_ReadVar(t *testing.T) {
 	assert.Equal(t, "abc", s)
 	assert.Equal(t, 3.1415, f)
 	assert.Equal(t, []byte{5, 6, 7}, bb)
+	assert.Equal(t, "binary", string(bt))
 	assert.Equal(t, Point{88, 99}, p)
 	assert.Equal(t, []int{7, 8, 9}, ii)
 	assert.Equal(t, User{666, "Devil"}, *u)
