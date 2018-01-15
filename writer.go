@@ -31,6 +31,13 @@ func (w *Writer) SetError(err error) {
 	}
 }
 
+func (w *Writer) Close() error {
+	if c, ok := w.wr.(io.Closer); ok {
+		return c.Close()
+	}
+	return nil
+}
+
 func (w *Writer) write(bb []byte) error {
 	w.Write(bb)
 	return w.err

@@ -39,6 +39,13 @@ func (r *Reader) SetError(err error) {
 	}
 }
 
+func (r *Reader) Close() error {
+	if c, ok := r.rd.(io.Closer); ok {
+		return c.Close()
+	}
+	return nil
+}
+
 func (r *Reader) SetReadLimit(sz uint64) {
 	if sz == 0 {
 		r.MaxCntRead = 0
