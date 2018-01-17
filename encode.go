@@ -2,11 +2,11 @@ package bin
 
 import "reflect"
 
-type Encoder interface {
+type BinEncoder interface {
 	BinEncode(*Writer)
 }
 
-type Decoder interface {
+type BinDecoder interface {
 	BinDecode(*Reader)
 }
 
@@ -26,7 +26,7 @@ func Decode(data []byte, vv ...interface{}) error {
 	return r.Error()
 }
 
-func EncodeObject(obj Encoder) ([]byte, error) {
+func EncodeObject(obj BinEncoder) ([]byte, error) {
 	w := NewBuffer(nil)
 	if obj != nil {
 		v := reflect.ValueOf(obj)
@@ -42,7 +42,7 @@ func EncodeObject(obj Encoder) ([]byte, error) {
 	return w.Bytes(), w.Writer.err
 }
 
-func DecodeObject(data []byte, obj Decoder) error {
+func DecodeObject(data []byte, obj BinDecoder) error {
 	r := NewBuffer(data)
 	if len(data) > 0 {
 		//if reflect.ValueOf(obj).IsNil() {

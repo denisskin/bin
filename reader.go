@@ -270,7 +270,7 @@ func (r *Reader) ReadVar(val interface{}) error {
 	case *[][]byte:
 		*v, _ = r.ReadSliceBytes()
 
-	case Decoder:
+	case BinDecoder:
 		bb, err := r.ReadBytes()
 		if err != nil {
 			return err
@@ -288,7 +288,7 @@ func (r *Reader) ReadVar(val interface{}) error {
 		if pp := reflect.ValueOf(val); pp.Kind() == reflect.Ptr && !pp.IsNil() {
 			if p := pp.Elem(); p.Kind() == reflect.Ptr { //  && p.IsNil()
 				objPtr := reflect.New(reflect.TypeOf(p.Interface()).Elem())
-				if obj, ok := objPtr.Interface().(Decoder); ok {
+				if obj, ok := objPtr.Interface().(BinDecoder); ok {
 					if bb, _ := r.ReadBytes(); len(bb) > 0 {
 						if err := DecodeObject(bb, obj); err != nil {
 							r.SetError(err)

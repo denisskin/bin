@@ -207,7 +207,7 @@ func (w *Writer) WriteVar(val interface{}) error {
 	case [][]byte:
 		w.WriteSliceBytes(v)
 
-	case Encoder:
+	case BinEncoder:
 		if data, err := EncodeObject(v); err == nil {
 			w.WriteBytes(data)
 		} else {
