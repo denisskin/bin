@@ -17,8 +17,8 @@ type Reader struct {
 }
 
 var (
-	errBinaryDataWasCorrupted = errors.New("Binary data was corrupted")
-	errExceededAllowableLimit = errors.New("Reader.Read-Error: Exceeded allowable limit")
+	errBinaryDataWasCorrupted = errors.New("bin.readVarInt-Error: binary data was corrupted")
+	errExceededAllowableLimit = errors.New("bin.Reader.Read-Error: exceeded allowable limit")
 )
 
 func NewReader(rd io.Reader) *Reader {
@@ -270,13 +270,9 @@ func (r *Reader) ReadVar(val interface{}) error {
 	case *[][]byte:
 		*v, _ = r.ReadSliceBytes()
 
-	case BinDecoder:
-		bb, err := r.ReadBytes()
-		if err != nil {
-			return err
-		}
-		if err := DecodeObject(bb, v); err != nil {
-			r.SetError(err)
+	case Decoder:
+		if bb, err := r.ReadBytes(); err == nil {
+			r.err = v.Decode(bb)
 		}
 
 	case *error:
@@ -288,9 +284,9 @@ func (r *Reader) ReadVar(val interface{}) error {
 		if pp := reflect.ValueOf(val); pp.Kind() == reflect.Ptr && !pp.IsNil() {
 			if p := pp.Elem(); p.Kind() == reflect.Ptr { //  && p.IsNil()
 				objPtr := reflect.New(reflect.TypeOf(p.Interface()).Elem())
-				if obj, ok := objPtr.Interface().(BinDecoder); ok {
+				if obj, ok := objPtr.Interface().(Decoder); ok {
 					if bb, _ := r.ReadBytes(); len(bb) > 0 {
-						if err := DecodeObject(bb, obj); err != nil {
+						if err := obj.Decode(bb); err != nil {
 							r.SetError(err)
 						} else {
 							p.Set(objPtr)
@@ -303,7 +299,7 @@ func (r *Reader) ReadVar(val interface{}) error {
 
 		//case reflect.Chan, reflect.Slice, reflect.Interface, reflect.Ptr, reflect.Map, reflect.Func:
 		//	if !v.IsNil() {
-		//		obj.BinEncode(w)
+		//		obj.Encode(w)
 		//	}
 		//}
 
