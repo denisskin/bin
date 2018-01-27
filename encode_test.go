@@ -6,6 +6,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestEncode_Nil(t *testing.T) {
+	var v interface{}
+
+	buf := Encode(v)
+
+	assert.Equal(t, []byte{0}, buf)
+}
+
 func TestDecode(t *testing.T) {
 	buf := Encode(
 		uint64(123),
