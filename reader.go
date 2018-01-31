@@ -233,6 +233,27 @@ func (r *Reader) ReadError() (error, error) {
 	}
 }
 
+func (r *Reader) readSlice(p reflect.Value) {
+	if n, err := r.ReadVarInt(); err == nil {
+		slice := reflect.MakeSlice(p.Type(), n, n)
+		for i := 0; i < n && r.err == nil; i++ {
+			r.ReadVar(slice.Index(i).Addr().Interface())
+		}
+		if r.err == nil {
+			p.Set(slice)
+		}
+	}
+}
+
+func (r *Reader) ReadSlice(val interface{}) error {
+	if pp := reflect.ValueOf(val); pp.Kind() == reflect.Ptr && !pp.IsNil() {
+		if p := pp.Elem(); p.Kind() == reflect.Slice {
+			r.readSlice(p)
+		}
+	}
+	return r.err //break
+}
+
 func (r *Reader) ReadVar(val interface{}) error {
 	switch v := val.(type) {
 	case *int:
@@ -285,20 +306,22 @@ func (r *Reader) ReadVar(val interface{}) error {
 
 	default:
 
-		// read object in case:  var obj*Object; r.Read(&obj)
 		if pp := reflect.ValueOf(val); pp.Kind() == reflect.Ptr && !pp.IsNil() {
-			if p := pp.Elem(); p.Kind() == reflect.Ptr { //  && p.IsNil()
+			p := pp.Elem()
+			switch p.Kind() {
+			case reflect.Ptr:
+				// read object in case:  var obj*Object; r.Read(&obj)
 				objPtr := reflect.New(reflect.TypeOf(p.Interface()).Elem())
 				if obj, ok := objPtr.Interface().(Decoder); ok {
-					if bb, _ := r.ReadBytes(); len(bb) > 0 {
-						if err := obj.Decode(bb); err != nil {
-							r.SetError(err)
-						} else {
-							p.Set(objPtr)
-						}
+					if err := r.ReadVar(obj); err == nil {
+						p.Set(objPtr)
 					}
-					break
+					return r.err
 				}
+
+			case reflect.Slice:
+				r.readSlice(p)
+				return r.err
 			}
 		}
 

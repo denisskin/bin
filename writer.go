@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"io"
 	"math"
+	"reflect"
 	"time"
 )
 
@@ -215,7 +216,21 @@ func (w *Writer) WriteVar(val interface{}) error {
 		w.WriteError(v)
 
 	default:
-		w.err = gob.NewEncoder(w).Encode(v)
+
+		rv := reflect.ValueOf(v)
+		//rt:=rv.Type().Kind()
+		if rv.Kind() == reflect.Slice {
+
+			n := rv.Len()
+			w.WriteVarInt(n)
+			for i := 0; i < n; i++ {
+				vi := rv.Index(i)
+				w.WriteVar(vi.Interface())
+			}
+
+		} else {
+			w.err = gob.NewEncoder(w).Encode(v)
+		}
 	}
 	return w.err
 }
