@@ -8,11 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type Point struct {
-	X int
-	Y int
-}
-
 func TestReader_ReadVar(t *testing.T) {
 	buf := bytes.NewBuffer(nil)
 	w := NewWriter(buf)
@@ -21,26 +16,34 @@ func TestReader_ReadVar(t *testing.T) {
 	w.WriteVar(3.1415)
 	w.WriteVar([]byte{5, 6, 7})
 	w.WriteVar(Point{88, 99})
+	w.WriteVar([]int{7, 8, 9})
+	w.WriteVar(&User{666, "Devil"})
 
 	var (
-		i int
-		s string
-		f float64
-		b []byte
-		p Point
+		i  int
+		s  string
+		f  float64
+		bb []byte
+		p  Point
+		ii []int
+		u  *User
 	)
 	r := NewReader(buf)
 	r.ReadVar(&i)
 	r.ReadVar(&s)
 	r.ReadVar(&f)
-	r.ReadVar(&b)
+	r.ReadVar(&bb)
 	r.ReadVar(&p)
+	r.ReadVar(&ii)
+	r.ReadVar(&u)
 
 	assert.Equal(t, 123, i)
 	assert.Equal(t, "abc", s)
 	assert.Equal(t, 3.1415, f)
-	assert.Equal(t, []byte{5, 6, 7}, b)
+	assert.Equal(t, []byte{5, 6, 7}, bb)
 	assert.Equal(t, Point{88, 99}, p)
+	assert.Equal(t, []int{7, 8, 9}, ii)
+	assert.Equal(t, User{666, "Devil"}, *u)
 }
 
 func TestReader_ReadVarInt(t *testing.T) {
@@ -100,18 +103,26 @@ func TestReader_ReadTime32(t *testing.T) {
 	assert.Equal(t, "2016-07-06 18:24:45 UTC", res.Format("2006-01-02 15:04:05 MST"))
 }
 
-func TestReader_ReadIntSlice(t *testing.T) {
+func TestReader_ReadSlice(t *testing.T) {
 	w := NewBuffer(nil)
-	for i := 0; i < 100; i++ {
-		w.WriteVar(i)
-	}
+	w.WriteVar([]Point{{1, 2}, {33, 44}})
 	r := w.Reader
 
-	for i := 0; i < 100; i++ {
-		var j int
-		r.ReadVar(&j)
-		assert.Equal(t, j, i)
-	}
+	var points []Point
+	r.ReadSlice(&points)
+
+	assert.Equal(t, []Point{{1, 2}, {33, 44}}, points)
+}
+
+func TestReader_ReadEncoder(t *testing.T) {
+	data := Encode(&User{123, "Alice"})
+
+	var b *User
+	r := NewBuffer(data)
+	err := r.ReadVar(&b)
+
+	assert.NoError(t, err)
+	assert.Equal(t, User{123, "Alice"}, *b)
 }
 
 func TestReader_SetReadLimit(t *testing.T) {
@@ -137,4 +148,23 @@ func TestReader_ReadLimit_Fail(t *testing.T) {
 	_, err := r.ReadBytes()
 
 	assert.Error(t, err)
+}
+
+//-----------------------------------
+type Point struct {
+	X int
+	Y int
+}
+
+type User struct {
+	ID   uint64
+	Name string
+}
+
+func (u *User) Encode() []byte {
+	return Encode(u.ID, u.Name)
+}
+
+func (u *User) Decode(data []byte) error {
+	return Decode(data, &u.ID, &u.Name)
 }
