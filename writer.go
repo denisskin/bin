@@ -120,15 +120,16 @@ func (w *Writer) WriteVarInt64(i int64) error {
 		h |= 0x40
 		i = -i
 	}
-	buf := make([]byte, 9)
+	const bufMaxLen = 8 + 1
+	buf := make([]byte, bufMaxLen)
 	var n byte = 0
 	for i > 0 {
 		n++
-		buf[9-n] = byte(i)
+		buf[bufMaxLen-n] = byte(i)
 		i >>= 8
 	}
-	buf[9-1-n] = h | n
-	return w.write(buf[9-1-n:])
+	buf[bufMaxLen-1-n] = h | n
+	return w.write(buf[bufMaxLen-1-n:])
 }
 
 func (w *Writer) WriteSliceBytes(bb [][]byte) error {
