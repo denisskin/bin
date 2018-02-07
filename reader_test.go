@@ -18,6 +18,7 @@ func TestReader_ReadVar(t *testing.T) {
 	w.WriteVar(Point{88, 99})
 	w.WriteVar([]int{7, 8, 9})
 	w.WriteVar(&User{666, "Devil"})
+	w.WriteVar([]*User{{1, "Alice"}, {2, "Bob"}})
 
 	var (
 		i  int
@@ -27,6 +28,7 @@ func TestReader_ReadVar(t *testing.T) {
 		p  Point
 		ii []int
 		u  *User
+		uu []*User
 	)
 	r := NewReader(buf)
 	r.ReadVar(&i)
@@ -36,6 +38,7 @@ func TestReader_ReadVar(t *testing.T) {
 	r.ReadVar(&p)
 	r.ReadVar(&ii)
 	r.ReadVar(&u)
+	r.ReadVar(&uu)
 
 	assert.Equal(t, 123, i)
 	assert.Equal(t, "abc", s)
@@ -44,6 +47,7 @@ func TestReader_ReadVar(t *testing.T) {
 	assert.Equal(t, Point{88, 99}, p)
 	assert.Equal(t, []int{7, 8, 9}, ii)
 	assert.Equal(t, User{666, "Devil"}, *u)
+	assert.Equal(t, []*User{{1, "Alice"}, {2, "Bob"}}, uu)
 }
 
 func TestReader_ReadVarInt(t *testing.T) {
