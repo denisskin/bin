@@ -1,8 +1,6 @@
 package bin
 
-import (
-	"bytes"
-)
+import "bytes"
 
 type Buffer struct {
 	buf *bytes.Buffer
@@ -11,21 +9,25 @@ type Buffer struct {
 }
 
 func NewBuffer(p []byte) *Buffer {
-	buf := &Buffer{
-		buf: bytes.NewBuffer(p),
+	buf := bytes.NewBuffer(p)
+	return &Buffer{
+		buf,
+		Reader{rd: buf},
+		Writer{wr: buf},
 	}
-	buf.Reader = *NewReader(buf.buf)
-	buf.Writer = *NewWriter(buf.buf)
-	return buf
 }
 
 func (b *Buffer) Error() error {
 	if b.Reader.err != nil {
 		return b.Reader.err
 	}
-	return b.Reader.err
+	return b.Writer.err
 }
 
 func (w *Buffer) Bytes() []byte {
 	return w.buf.Bytes()
+}
+
+func (w *Buffer) Buffer() *bytes.Buffer {
+	return w.buf
 }
