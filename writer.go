@@ -236,6 +236,8 @@ func (w *Writer) WriteVar(val interface{}) error {
 		w.WriteSliceString(v)
 	case []byte:
 		w.WriteBytes(v)
+	case Bytes:
+		w.WriteBytes(v)
 	case [][]byte:
 		w.WriteSliceBytes(v)
 

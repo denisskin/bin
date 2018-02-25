@@ -318,6 +318,8 @@ func (r *Reader) ReadVar(val interface{}) error {
 		*v, _ = r.ReadSliceString()
 	case *[]byte:
 		*v, _ = r.ReadBytes()
+	case *Bytes:
+		*v, _ = r.ReadBytes()
 	case *[][]byte:
 		*v, _ = r.ReadSliceBytes()
 
