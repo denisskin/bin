@@ -258,7 +258,6 @@ func (w *Writer) WriteVar(val interface{}) error {
 	default:
 
 		rv := reflect.ValueOf(v)
-		//rt:=rv.Type().Kind()
 		if rv.Kind() == reflect.Slice {
 
 			n := rv.Len()
@@ -269,7 +268,6 @@ func (w *Writer) WriteVar(val interface{}) error {
 			}
 
 		} else {
-			panic(666)
 			w.err = gob.NewEncoder(w).Encode(v)
 		}
 	}
