@@ -1,8 +1,8 @@
 package bin
 
 import (
+	"encoding/json"
 	"testing"
-	"xnet/std/json"
 
 	"github.com/stretchr/testify/assert"
 )
