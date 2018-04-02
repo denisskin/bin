@@ -334,7 +334,7 @@ func (r *Reader) ReadVar(val interface{}) error {
 		if bb, err := r.ReadBytes(); err == nil {
 			r.err = v.Decode(bb)
 		}
-	case binDecoder:
+	case binReader:
 		v.BinRead(r)
 
 	case *error:

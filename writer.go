@@ -249,7 +249,7 @@ func (w *Writer) WriteVar(val interface{}) error {
 	case Encoder:
 		w.WriteBytes(v.Encode())
 
-	case binEncoder:
+	case binWriter:
 		v.BinWrite(w)
 
 	case error:
