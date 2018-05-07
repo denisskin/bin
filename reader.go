@@ -210,7 +210,7 @@ func (r *Reader) ReadVarUint64() (uint64, error) {
 
 func (r *Reader) ReadSliceBytes() ([][]byte, error) {
 	n, err := r.ReadVarInt()
-	if err != nil {
+	if err != nil || n == 0 {
 		return nil, err
 	}
 	res := make([][]byte, n)
@@ -228,7 +228,7 @@ func (r *Reader) ReadBytes() ([]byte, error) {
 	} else if n > 0 {
 		return r.read(n)
 	}
-	return []byte{}, nil
+	return nil, nil
 }
 
 func (r *Reader) ReadString() (string, error) {
@@ -238,7 +238,7 @@ func (r *Reader) ReadString() (string, error) {
 
 func (r *Reader) ReadSliceString() ([]string, error) {
 	n, err := r.ReadVarInt()
-	if err != nil {
+	if err != nil || n == 0 {
 		return nil, err
 	}
 	res := make([]string, n)
@@ -260,6 +260,10 @@ func (r *Reader) ReadError() (error, error) {
 
 func (r *Reader) readSlice(p reflect.Value) {
 	if n, err := r.ReadVarInt(); err == nil {
+		if n == 0 {
+			p.Set(reflect.Zero(p.Type()))
+			return
+		}
 		slice := reflect.MakeSlice(p.Type(), n, n)
 		for i := 0; i < n && r.err == nil; i++ {
 			r.ReadVar(slice.Index(i).Addr().Interface())
