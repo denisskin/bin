@@ -159,10 +159,21 @@ func TestReader_ReadSlice(t *testing.T) {
 	w.WriteVar([]Point{{1, 2}, {33, 44}})
 	r := w.Reader
 
-	var points []Point
+	var points = []Point{{-1, -1}}
 	r.ReadSlice(&points)
 
 	assert.Equal(t, []Point{{1, 2}, {33, 44}}, points)
+}
+
+func TestReader_ReadNilSlice(t *testing.T) {
+	w := NewBuffer(nil)
+	w.WriteVar([]Point{})
+	r := w.Reader
+
+	var points = []Point{{-1, -1}}
+	r.ReadSlice(&points)
+
+	assert.Nil(t, points)
 }
 
 func TestReader_ReadEncoder(t *testing.T) {
