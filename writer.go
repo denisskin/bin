@@ -134,6 +134,9 @@ func (w *Writer) WriteVarInt64(i int64) error {
 }
 
 func (w *Writer) WriteBigInt(i *big.Int) error {
+	if i == nil {
+		return w.write([]byte{0})
+	}
 	sign := i.Sign()
 	if sign == 0 {
 		return w.write([]byte{0})
