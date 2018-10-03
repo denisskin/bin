@@ -59,6 +59,10 @@ func (w *Writer) Write(bb []byte) (n int, err error) {
 }
 
 //----------- fixed types --------------
+func (w *Writer) WriteNil() error {
+	return w.write([]byte{0})
+}
+
 func (w *Writer) WriteByte(b byte) error {
 	return w.write([]byte{b})
 }
@@ -209,7 +213,7 @@ func (w *Writer) WriteVar(val ...interface{}) error {
 func (w *Writer) writeVar(val interface{}) error {
 	switch v := val.(type) {
 	case nil:
-		w.Write([]byte{0})
+		w.WriteNil()
 
 	case int:
 		w.WriteVarInt64(int64(v))
@@ -259,7 +263,11 @@ func (w *Writer) writeVar(val interface{}) error {
 		w.WriteBigInt(&v)
 
 	case Encoder:
-		w.WriteBytes(v.Encode())
+		if isNil(val) {
+			w.WriteNil()
+		} else {
+			w.WriteBytes(v.Encode())
+		}
 
 	case binWriter:
 		v.BinWrite(w)
@@ -284,4 +292,15 @@ func (w *Writer) writeVar(val interface{}) error {
 		}
 	}
 	return w.err
+}
+
+func isNil(v interface{}) bool {
+	if v == nil {
+		return true
+	}
+	switch v := reflect.ValueOf(v); v.Kind() {
+	case reflect.Chan, reflect.Slice, reflect.Interface, reflect.Ptr, reflect.Map, reflect.Func:
+		return v.IsNil()
+	}
+	return false
 }
