@@ -283,7 +283,16 @@ func (r *Reader) ReadSlice(val interface{}) error {
 	return r.err //break
 }
 
-func (r *Reader) ReadVar(val interface{}) error {
+func (r *Reader) ReadVar(val ...interface{}) error {
+	for _, v := range val {
+		if err := r.readVar(v); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (r *Reader) readVar(val interface{}) error {
 	switch v := val.(type) {
 	case *int:
 		*v = int(r.readVarInt())
@@ -351,9 +360,17 @@ func (r *Reader) ReadVar(val interface{}) error {
 			switch p.Kind() {
 			case reflect.Ptr:
 				// read object in case:  var obj*Object; r.Read(&obj)
-				objPtr := reflect.New(reflect.TypeOf(p.Interface()).Elem())
+				buf, err := r.ReadBytes()
+				if err != nil {
+					return err
+				}
+				if len(buf) == 0 { // set nil pointer object
+					p.Set(reflect.Zero(p.Type()))
+					return nil
+				}
+				objPtr := reflect.New(p.Type().Elem())
 				if obj, ok := objPtr.Interface().(Decoder); ok {
-					if err := r.ReadVar(obj); err == nil {
+					if r.err = obj.Decode(buf); r.err == nil {
 						p.Set(objPtr)
 					}
 					return r.err
