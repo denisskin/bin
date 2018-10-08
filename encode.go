@@ -10,18 +10,12 @@ type Decoder interface {
 
 func Encode(vv ...interface{}) []byte {
 	w := NewBuffer(nil)
-	for _, v := range vv {
-		w.WriteVar(v)
-	}
+	w.WriteVar(vv...)
 	return w.Bytes()
 }
 
 func Decode(data []byte, vv ...interface{}) error {
-	r := NewBuffer(data)
-	for _, v := range vv {
-		r.ReadVar(v)
-	}
-	return r.Error()
+	return NewBuffer(data).ReadVar(vv...)
 }
 
 type binWriter interface {
