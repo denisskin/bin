@@ -187,6 +187,19 @@ func TestReader_ReadEncoder(t *testing.T) {
 	assert.Equal(t, User{123, "Alice"}, *b)
 }
 
+func TestReader_ReadNilPointerEncoder(t *testing.T) {
+	var nilUser *User
+	data := Encode(nilUser)
+
+	var b = new(User)
+	r := NewBuffer(data)
+	err := r.ReadVar(&b)
+
+	assert.Equal(t, []byte{0}, data)
+	assert.NoError(t, err)
+	assert.Nil(t, b)
+}
+
 func TestReader_SetReadLimit(t *testing.T) {
 	arr := make([]byte, 100)
 	w := NewBuffer(nil)
