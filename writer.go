@@ -197,7 +197,16 @@ func (w *Writer) WriteError(err error) error {
 	return w.WriteString(err.Error())
 }
 
-func (w *Writer) WriteVar(val interface{}) error {
+func (w *Writer) WriteVar(val ...interface{}) error {
+	for _, v := range val {
+		if err := w.writeVar(v); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (w *Writer) writeVar(val interface{}) error {
 	switch v := val.(type) {
 	case nil:
 		w.Write([]byte{0})
