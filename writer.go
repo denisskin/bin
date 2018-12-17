@@ -262,18 +262,17 @@ func (w *Writer) writeVar(val interface{}) error {
 	case big.Int:
 		w.WriteBigInt(&v)
 
-	case Encoder:
-		if isNil(val) {
-			w.WriteNil()
-		} else {
-			w.WriteBytes(v.Encode())
-		}
-
 	case binaryEncoder:
 		if isNil(val) {
 			w.WriteNil()
 		} else {
 			w.err = v.BinaryEncode(w.wr)
+		}
+	case Encoder:
+		if isNil(val) {
+			w.WriteNil()
+		} else {
+			w.WriteBytes(v.Encode())
 		}
 
 	case binWriter:
