@@ -1,5 +1,7 @@
 package bin
 
+import "io"
+
 type Encoder interface {
 	Encode() []byte
 }
@@ -16,6 +18,14 @@ func Encode(vv ...interface{}) []byte {
 
 func Decode(data []byte, vv ...interface{}) error {
 	return NewBuffer(data).ReadVar(vv...)
+}
+
+type binaryEncoder interface {
+	BinaryEncode(w io.Writer) error
+}
+
+type binaryDecoder interface {
+	BinaryDecode(r io.Reader) error
 }
 
 type binWriter interface {
