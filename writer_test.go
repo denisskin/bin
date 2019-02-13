@@ -30,6 +30,7 @@ func TestWriter_WriteVar(t *testing.T) {
 	w.WriteVar(0.3)
 	w.WriteVar([]int{77, 88, 99})
 	w.WriteVar("abc")
+	w.WriteVar(map[int]int{4: 55})
 
 	assert.Equal(t, []byte{
 		0,          // 0
@@ -42,6 +43,7 @@ func TestWriter_WriteVar(t *testing.T) {
 		0x3f, 0xd3, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, // 0.3
 		0x3, 77, 88, 99, // []int{77, 88, 99}
 		0x3, 0x61, 0x62, 0x63, // "abc"
+		0x1, 4, 55,
 	}, w.Bytes())
 }
 

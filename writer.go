@@ -285,8 +285,9 @@ func (w *Writer) writeVar(val interface{}) error {
 	default:
 
 		rv := reflect.ValueOf(v)
-		if rv.Kind() == reflect.Slice {
+		switch rv.Kind() {
 
+		case reflect.Slice:
 			n := rv.Len()
 			w.WriteVarInt(n)
 			for i := 0; i < n; i++ {
@@ -294,7 +295,15 @@ func (w *Writer) writeVar(val interface{}) error {
 				w.WriteVar(vi.Interface())
 			}
 
-		} else {
+		case reflect.Map:
+			keys := rv.MapKeys()
+			w.WriteVarInt(len(keys))
+			for _, key := range keys {
+				w.WriteVar(key.Interface())
+				w.WriteVar(rv.MapIndex(key).Interface())
+			}
+
+		default:
 			w.err = gob.NewEncoder(w).Encode(v)
 		}
 	}

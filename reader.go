@@ -274,13 +274,24 @@ func (r *Reader) readSlice(p reflect.Value) {
 	}
 }
 
-func (r *Reader) ReadSlice(val interface{}) error {
-	if pp := reflect.ValueOf(val); pp.Kind() == reflect.Ptr && !pp.IsNil() {
-		if p := pp.Elem(); p.Kind() == reflect.Slice {
-			r.readSlice(p)
+func (r *Reader) readMap(p reflect.Value) {
+	if n, err := r.ReadVarInt(); err == nil {
+		if n == 0 {
+			p.Set(reflect.Zero(p.Type()))
+			return
+		}
+		mp := reflect.MakeMap(p.Type())
+		key := reflect.New(p.Type().Key())
+		val := reflect.New(p.Type().Elem())
+		for i := 0; i < n && r.err == nil; i++ {
+			if r.ReadVar(key.Interface()) == nil && r.ReadVar(val.Interface()) == nil {
+				mp.SetMapIndex(key.Elem(), val.Elem())
+			}
+		}
+		if r.err == nil {
+			p.Set(mp)
 		}
 	}
-	return r.err //break
 }
 
 func (r *Reader) ReadVar(val ...interface{}) error {
@@ -378,6 +389,10 @@ func (r *Reader) readVar(val interface{}) error {
 					}
 					return r.err
 				}
+
+			case reflect.Map:
+				r.readMap(p)
+				return r.err
 
 			case reflect.Slice:
 				r.readSlice(p)

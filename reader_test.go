@@ -154,13 +154,24 @@ func TestReader_ReadTime32(t *testing.T) {
 	assert.Equal(t, "2016-07-06 18:24:45 UTC", res.Format("2006-01-02 15:04:05 MST"))
 }
 
+func TestReader_ReadMap(t *testing.T) {
+	w := NewBuffer(nil)
+	w.WriteVar(map[int]string{2: "aa", 3: "bb", 4: "cc", 5: "dd"})
+	r := w.Reader
+
+	var mm = map[int]string{1: "00"}
+	r.ReadVar(&mm)
+
+	assert.Equal(t, map[int]string{2: "aa", 3: "bb", 4: "cc", 5: "dd"}, mm)
+}
+
 func TestReader_ReadSlice(t *testing.T) {
 	w := NewBuffer(nil)
 	w.WriteVar([]Point{{1, 2}, {33, 44}})
 	r := w.Reader
 
 	var points = []Point{{-1, -1}}
-	r.ReadSlice(&points)
+	r.ReadVar(&points)
 
 	assert.Equal(t, []Point{{1, 2}, {33, 44}}, points)
 }
@@ -171,7 +182,7 @@ func TestReader_ReadNilSlice(t *testing.T) {
 	r := w.Reader
 
 	var points = []Point{{-1, -1}}
-	r.ReadSlice(&points)
+	r.ReadVar(&points)
 
 	assert.Nil(t, points)
 }
