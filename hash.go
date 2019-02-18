@@ -9,7 +9,7 @@ func Hash32(values ...interface{}) uint32 {
 
 func Hash64(values ...interface{}) uint64 {
 	h256 := Hash256(values...)
-	return BytesToUint64(h256[:8])
+	return BytesToUint64(h256)
 }
 
 func Hash128(values ...interface{}) []byte {
