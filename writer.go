@@ -187,7 +187,7 @@ func (w *Writer) WriteString(s string) error {
 	return w.err
 }
 
-func (w *Writer) WriteSliceString(ss []string) error {
+func (w *Writer) WriteStrings(ss []string) error {
 	w.WriteVarInt(len(ss))
 	for _, s := range ss {
 		if w.WriteString(s) != nil {
@@ -249,7 +249,7 @@ func (w *Writer) writeVar(val interface{}) error {
 	case string:
 		w.WriteString(v)
 	case []string:
-		w.WriteSliceString(v)
+		w.WriteStrings(v)
 	case []byte:
 		w.WriteBytes(v)
 	case Bytes:
