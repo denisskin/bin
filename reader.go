@@ -236,7 +236,7 @@ func (r *Reader) ReadString() (string, error) {
 	return string(v), err
 }
 
-func (r *Reader) ReadSliceString() ([]string, error) {
+func (r *Reader) ReadStrings() ([]string, error) {
 	n, err := r.ReadVarInt()
 	if err != nil || n == 0 {
 		return nil, err
@@ -339,7 +339,7 @@ func (r *Reader) readVar(val interface{}) error {
 	case *string:
 		*v, _ = r.ReadString()
 	case *[]string:
-		*v, _ = r.ReadSliceString()
+		*v, _ = r.ReadStrings()
 	case *[]byte:
 		*v, _ = r.ReadBytes()
 	case *Bytes:
