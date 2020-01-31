@@ -1,6 +1,7 @@
 package bin
 
 import (
+	"encoding"
 	"encoding/gob"
 	"errors"
 	"io"
@@ -363,6 +364,11 @@ func (r *Reader) readVar(val interface{}) error {
 		}
 	case binReader:
 		v.BinRead(r)
+
+	case encoding.BinaryUnmarshaler:
+		if buf, err := r.ReadBytes(); err == nil {
+			r.err = v.UnmarshalBinary(buf)
+		}
 
 	case *error:
 		*v, _ = r.ReadError()

@@ -2,6 +2,7 @@ package bin
 
 import (
 	"bytes"
+	"encoding"
 	"encoding/gob"
 	"io"
 	"math"
@@ -277,6 +278,15 @@ func (w *Writer) writeVar(val interface{}) error {
 
 	case binWriter:
 		v.BinWrite(w)
+
+	case encoding.BinaryMarshaler:
+		if isNil(val) {
+			w.WriteNil()
+		} else if buf, err := v.MarshalBinary(); err == nil {
+			w.WriteBytes(buf)
+		} else {
+			w.err = err
+		}
 
 	case error:
 		w.WriteError(v)
