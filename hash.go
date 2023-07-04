@@ -1,31 +1,28 @@
 package bin
 
-import (
-	"crypto/sha256"
-	"hash/fnv"
-)
+import "crypto/sha256"
 
-func Hash32(values ...interface{}) uint32 {
+func Hash32(values ...any) uint32 {
 	h256 := Hash256(values...)
 	return BytesToUint32(h256[:4])
 }
 
-func Hash64(values ...interface{}) uint64 {
+func Hash64(values ...any) uint64 {
 	h256 := Hash256(values...)
 	return BytesToUint64(h256)
 }
 
-func Hash128(values ...interface{}) []byte {
+func Hash128(values ...any) []byte {
 	h256 := Hash256(values...)
 	return h256[:16]
 }
 
-func Hash160(values ...interface{}) []byte {
+func Hash160(values ...any) []byte {
 	h256 := Hash256(values...)
 	return h256[:20]
 }
 
-func Hash256(values ...interface{}) []byte {
+func Hash256(values ...any) []byte {
 	hash := sha256.New()
 	w := NewWriter(hash)
 	for _, val := range values {
@@ -34,11 +31,12 @@ func Hash256(values ...interface{}) []byte {
 	return hash.Sum(nil)
 }
 
-func FastHash64(values ...interface{}) uint64 {
-	hash := fnv.New64()
-	w := NewWriter(hash)
-	for _, val := range values {
-		w.WriteVar(val)
+// FastHash64 is fast non-cryptographic hash function
+func FastHash64(values ...any) uint64 {
+	data := Encode(values...)
+	h := uint64(14695981039346656037)
+	for _, c := range data {
+		h = (h * 1099511628211) ^ (uint64(c) * 1073676287)
 	}
-	return hash.Sum64()
+	return h
 }
