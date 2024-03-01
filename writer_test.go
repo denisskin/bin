@@ -25,8 +25,8 @@ func TestWriter_WriteVar(t *testing.T) {
 	w.WriteVar(255)
 	w.WriteVar(256)
 	w.WriteVar(-13)
-	w.WriteVar(0x01020304050607)
 	w.WriteVar(uint64(math.MaxUint64))
+	w.WriteVar(0x01020304050607)
 	w.WriteVar(0.3)
 	w.WriteVar([]int{77, 88, 99})
 	w.WriteVar("abc")
@@ -38,8 +38,8 @@ func TestWriter_WriteVar(t *testing.T) {
 		0x81, 0xff, // 255
 		0x82, 1, 0, // 256
 		0xc1, 13, // -13
+		0xc1, 1, // max uint64 or -1
 		0x87, 1, 2, 3, 4, 5, 6, 7, // 0x01020304050607
-		0xc1, 1, // -1
 		0x3f, 0xd3, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, // 0.3
 		0x3, 77, 88, 99, // []int{77, 88, 99}
 		0x3, 0x61, 0x62, 0x63, // "abc"
