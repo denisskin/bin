@@ -8,17 +8,20 @@ w := NewWriter(buf)
 w.WriteVar(uint64(123))
 w.WriteVar("abc")
 w.WriteVar(3.1415)
+w.WriteVar([]byte{5, 6, 7})
 
 //----- read
 var (
     i  int
     s  string
     f  float64
+    bb []byte
 )
 r := NewReader(buf)
-r.ReadVar(&i) // 123
-r.ReadVar(&s) // "abc"
-r.ReadVar(&f) // 3.1415
+r.ReadVar(&i)   // 123
+r.ReadVar(&s)   // "abc"
+r.ReadVar(&f)   // 3.1415
+r.ReadVar(&bb)  // []byte{5, 6, 7}
 ```
 
 Encode, decode var int
